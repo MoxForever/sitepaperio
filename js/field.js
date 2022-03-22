@@ -34,14 +34,14 @@ class Field
 	{
 		var ctx = canvas.getContext('2d');
 
-		var right = Math.ceil((camera.pos.x  + canvas.width) / this.cell_size.x)-1,
-			left = Math.ceil((camera.pos.x) / this.cell_size.x)-1,
-			top = Math.ceil((camera.pos.y + canvas.height) / this.cell_size.y)-1,
-			bottom = Math.ceil((camera.pos.y) / this.cell_size.y)-1;
+		var right = Math.ceil((camera.pos.x + canvas.width / camera.scale) / this.cell_size.x)-1,
+			left = Math.ceil((camera.pos.x - canvas.width / 2 / camera.scale) / this.cell_size.x)-1,
+			bottom = Math.ceil((camera.pos.y + canvas.height / camera.scale) / this.cell_size.y)-1,
+			top = Math.ceil((camera.pos.y - canvas.height / 2 / camera.scale) / this.cell_size.y)-1;
 
 		for (var x = left; x <= right; x++)
 		{
-			for (var y = bottom; y <= top; y++)
+			for (var y = top; y <= bottom; y++)
 			{
 				if (x < 0 || x >= this.size.x || y < 0 || y >= this.size.y)
 				{
@@ -60,9 +60,9 @@ class Field
 						ctx.fillStyle = "#eee";
 					}
 				}
-				ctx.fillRect(x * this.cell_size.x - camera.pos.x,
-							 y * this.cell_size.y - camera.pos.y,
-							 this.cell_size.x, this.cell_size.y);
+				ctx.fillRect(Math.ceil((x * this.cell_size.x - camera.pos.x) * camera.scale + canvas.width / 2),
+							 Math.ceil((y * this.cell_size.y - camera.pos.y) * camera.scale + canvas.height / 2),
+							 this.cell_size.x * camera.scale, this.cell_size.y * camera.scale);
 			}
 		}
 	}

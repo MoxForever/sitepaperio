@@ -50,6 +50,9 @@ function main_loop ()
 function onKeyDown(event){
   var keyCode = event.keyCode;
   switch(keyCode){
+  	case 81:
+  		console.log(keyCode);
+  		field.cell_size = new Vector(field.cell_size.x * 1.1, field.cell_size.y * 1.1)
     case 87:  //w
         keyW = true;
     break;
