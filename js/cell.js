@@ -1,38 +1,36 @@
 class CellTypes {
+	static player = new CellTypes(0, "player");
+	static trail = new CellTypes(1, "trail");
+	static unbreakable = new CellTypes(2, "unbreakable");
+
 	constructor (id, name)
 	{
 		this.id = id;
 		this.name = name;
-		this.extra = null;
-	}
-
-	static get_player (pl_id, color)
-	{
-		var cell = new CellTypes(0, "player");
-		cell.extra = {"pl_id": pl_id, "color": color};
-		return cell;
-	}
-
-	static get_trail (pl_id, color)
-	{
-		var cell = new CellTypes(1, "trail");
-		cell.extra = {"pl_id": pl_id, "color": color};
-		return cell;
-	}
-
-	static get_unbreakable()
-	{
-		return new CellTypes(2, "unbreakable");
 	}
 }
 
 
 class Cell
 {
-	constructor (type, field, pos)
+	constructor (type, field)
 	{
 		this.type = type;
 		this.field = field;
-		this.pos = pos
+		this.extra = {};
+		this.pos = null;
+	}
+
+	get_color ()
+	{
+		if (this.type.id == 2) return new Color(68, 68, 68);
+		else if (this.type.id == 1 || this.type.id == 0) return this.extra["color"];
+	}
+
+	copy ()
+	{
+		var copy = new Cell(this.type, this.field);
+		copy.extra = this.extra;
+		return copy;
 	}
 }
