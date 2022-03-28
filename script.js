@@ -5,13 +5,28 @@ var canvas = null,
 
 var lastCalledTime;
 
-var current_state = "game";
+var current_state = "menu";
 
 var keyboard_presseed_btns = {};
+
+var random_move_thread = null;
+
+
+function reload_screen()
+{
+	document.getElementById('loading').style.opacity = 1;
+}
+
+
+function load_complete()
+{
+	document.getElementById('loading').style.opacity = 0;
+}
 
 
 window.onload = function ()
 {
+	setTimeout(load_complete, 500);
 	canvas = document.getElementById('main-screen');
 
 	canvas.width = window.innerWidth;
@@ -19,12 +34,14 @@ window.onload = function ()
 
 	camera = new Camera();
 	field = new Field(new Vector(100, 100));
-	player = new Player(0, new Vector(1050, 50), new Color(76, 0, 140), field);
-	player.spawn();
+	player = new Player(0, new Vector(Math.floor(Math.random()*field.size.x*field.cell_size.x),
+									  Math.floor(Math.random()*field.size.y*field.cell_size.y)),
+						Color.random(), field);
 
 	camera.pos = player.pos;
 
 	setInterval(main_loop, 1);
+	random_move_thread = setInterval(randomize_moving, 5000);
 	window.onkeyup = keyboard_listener;
 	window.onkeydown = keyboard_listener;
 	window.onwheel = scroll_listener;
@@ -44,7 +61,39 @@ function main_loop ()
 
 	var fps = requestAnimFrame();
 
-	if (current_state == "game")
+	if (current_state == "menu")
+	{
+		camera.scale = (Math.min(canvas.width, canvas.height)/1250 - Math.sqrt(player.score)/Math.PI/100).toFixed(2);
+
+		field.draw(canvas, camera);
+		player.draw(canvas, camera);
+
+		try
+		{
+			if (fps < 1) fps = 60;
+			player.physic_process(field, fps);
+		}
+		catch (error)
+		{
+			if (error == "dead") 
+			{
+				reload_screen();
+				current_state = "menu_wait";
+				clearInterval(random_move_thread);
+				setTimeout(function () {
+					current_state = "menu";
+					window.onload();
+				}, 500);
+			}
+			else throw error;
+		}
+	}
+	else if (current_state == "menu_wait")
+	{
+		field.draw(canvas, camera);
+		player.draw(canvas, camera);
+	}
+	else if (current_state == "game")
 	{
 		camera.scale = (Math.min(canvas.width, canvas.height)/1250 - Math.sqrt(player.score)/Math.PI/100).toFixed(2);
 
@@ -78,6 +127,14 @@ function main_loop ()
 	ctx.fillStyle = "#000";
 	ctx.font = "24px Verdana";
 	ctx.fillText(fps.toFixed() + " fps", 10, 20);
+}
+
+function randomize_moving()
+{
+	set_dest = Math.floor(Math.random()*4);
+	if (set_dest % 2 == player.dest % 2) set_dest += 1;
+	if (set_dest > 3) set_dest = 0;
+	player.dest = set_dest;
 }
 
 function keyboard_listener(event)
